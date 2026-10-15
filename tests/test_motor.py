@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from src.historia import HistoriaInvalida, cargar_historia, construir_historia, validar
-from src.motor import OpcionNoDisponible, Sesion
+from src.motor import DeshacerNoDisponible, OpcionNoDisponible, Sesion
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 ORIGINAL = DATA / "la_ultima_transmision.json"
@@ -125,10 +125,14 @@ def test_u5_reiniciar():
     s = sesion_en_e3(True)
     s.elegir("activar_codigo")
     assert s.es_final()
+    assert s.puede_deshacer()
     s.reiniciar()
     assert s.escena.id == "E1"
     assert s.variables == {"conoce_origen": False, "confia_en_la_voz": False}
     assert not s.es_final()
+    assert not s.puede_deshacer()  # reiniciar elimina el historial
+    with pytest.raises(DeshacerNoDisponible):
+        s.deshacer()
 
 
 # Escena no final sin opciones habilitadas durante la partida
@@ -183,3 +187,88 @@ def test_segunda_historia_mismo_motor(decisiones, final):
     for d in decisiones:
         s.elegir(d)
     assert s.es_final() and s.escena.id == final
+
+
+# I1 (extensión): cargar archivo, recorrer hasta un final y deshacer desde él
+@pytest.mark.parametrize("decisiones,final,previa,vars_previas", [
+    (["revisar", "investigar", "activar_codigo"], "E4", "E3",
+     {"conoce_origen": True, "confia_en_la_voz": False}),
+    (["revisar", "continuar", "activar_sin_verificar"], "E5", "E3",
+     {"conoce_origen": False, "confia_en_la_voz": False}),
+    (["revisar", "continuar", "cortar"], "E6", "E3",
+     {"conoce_origen": False, "confia_en_la_voz": False}),
+])
+def test_i1_deshacer_desde_un_final(decisiones, final, previa, vars_previas):
+    s = Sesion(cargar_historia(ORIGINAL))
+    for d in decisiones:
+        s.elegir(d)
+    assert s.es_final() and s.escena.id == final
+    s.deshacer()
+    assert s.escena.id == previa
+    assert s.variables == vars_previas
+    assert not s.es_final()
+
+
+# U6: deshacer restaura escena y variables y consume la posibilidad de retroceder
+def test_u6_ejemplo_del_enunciado():
+    s = Sesion(cargar_historia(ORIGINAL))
+    s.elegir("revisar")                      # E2
+    s.elegir("investigar")                   # E3, conoce_origen verdadero
+    assert s.escena.id == "E3" and s.variables["conoce_origen"] is True
+    s.deshacer()
+    assert s.escena.id == "E2" and s.variables["conoce_origen"] is False
+    antes = (s.escena.id, s.variables)
+    with pytest.raises(DeshacerNoDisponible):  # segundo intento no cambia nada
+        s.deshacer()
+    assert (s.escena.id, s.variables) == antes
+    s.elegir("continuar")                    # nueva elección válida
+    assert ids(s) == ["activar_sin_verificar", "cortar"]
+
+
+def test_u6_al_comenzar_no_hay_retroceso():
+    s = Sesion(cargar_historia(ORIGINAL))
+    assert not s.puede_deshacer()
+    with pytest.raises(DeshacerNoDisponible):
+        s.deshacer()
+    assert s.escena.id == "E1"
+
+
+@pytest.mark.parametrize("invalida", ["activar_codigo", "no_existe"])
+def test_u6_entrada_invalida_preserva_historial(invalida):
+    s = sesion_en_e3(False)              # estado: E3, conoce_origen falso
+    with pytest.raises(OpcionNoDisponible):
+        s.elegir(invalida)
+    assert s.puede_deshacer()            # el historial de la última elección válida sigue
+    s.deshacer()
+    assert s.escena.id == "E2"
+    assert s.variables["conoce_origen"] is False
+
+
+def test_u6_nueva_eleccion_vuelve_a_habilitar_retroceso():
+    s = sesion_en_e3(True)
+    s.deshacer()                         # E2
+    assert not s.puede_deshacer()
+    s.elegir("investigar")
+    assert s.puede_deshacer()
+    s.deshacer()
+    assert s.escena.id == "E2"
+    assert s.variables == {"conoce_origen": False, "confia_en_la_voz": False}
+
+
+def test_u6_un_solo_nivel_no_encadena():
+    s = Sesion(cargar_historia(ORIGINAL))
+    s.elegir("revisar")
+    s.elegir("investigar")
+    s.deshacer()                         # vuelve a E2
+    with pytest.raises(DeshacerNoDisponible):
+        s.deshacer()                     # no regresa a E1
+    assert s.escena.id == "E2"
+
+
+def test_u6_restaura_variables_cuando_efecto_cambia_confia():
+    s = sesion_en_e3(True)
+    s.elegir("activar_codigo")           # confia pasa a verdadero, E4
+    assert s.variables["confia_en_la_voz"] is True
+    s.deshacer()
+    assert s.escena.id == "E3"
+    assert s.variables == {"conoce_origen": True, "confia_en_la_voz": False}

@@ -23,7 +23,7 @@ El registro de la última ejecución está en `evidencia/resultados_pruebas.txt`
 
 ## Estructura
 - `src/historia.py` — contenido: modelo de datos y validación del archivo
-- `src/motor.py` — reglas: sesión, condiciones, efectos, reinicio
+- `src/motor.py` — reglas: sesión, condiciones, efectos, reinicio y deshacer
 - `src/consola.py` — interfaz de consola
 - `data/` — historias (`la_ultima_transmision.json`, `historia_faro.json`) y ejemplos inválidos en `data/invalidas/`
 - `tests/test_motor.py` — pruebas U1–U5, I1 y validación
@@ -40,9 +40,15 @@ Un mapa de condiciones vacío o ausente habilita la opción; todas las condicion
 - E6 Silencio: `revisar` → (`investigar` o `continuar`) → `cortar`
 
 ## Conflicto retroceso (escritora) vs. irreversibilidad (diseñador)
-No se implementa retroceso. Acuerdo provisional: las decisiones son irreversibles hasta que el cliente responda la pregunta de aclaración: *¿el retroceso debe estar siempre disponible o solo en ciertas escenas?*
+- **v1 (hora 6):** no se implementó retroceso. Acuerdo provisional: decisiones irreversibles, con la pregunta de aclaración *¿el retroceso debe estar siempre disponible o solo en ciertas escenas?*
+- **v2 (solicitud de cambio):** el cliente decidió que el lector puede deshacer su última decisión. Reglas implementadas:
+  - restaura exactamente escena y variables anteriores a la última elección válida;
+  - un solo nivel: tras deshacer no hay otro retroceso hasta una nueva elección válida;
+  - al comenzar o reiniciar no hay retroceso (el reinicio elimina el historial);
+  - una opción inexistente o no habilitada no modifica la sesión ni el historial;
+  - se puede deshacer desde un final (E4, E5, E6 regresan a E3).
+- En la consola: opción `0` para deshacer (o `d` en la pantalla de final).
 
 ## Limitaciones conocidas
 - No se analizan automáticamente todos los caminos posibles del relato (alcanzabilidad); un bloqueo se informa en la partida.
 - Sin guardado entre ejecuciones.
-- Pendiente: solicitud de cambio de la segunda fase.

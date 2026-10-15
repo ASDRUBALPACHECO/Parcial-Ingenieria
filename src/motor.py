@@ -8,6 +8,10 @@ class OpcionNoDisponible(Exception):
     """La opción no existe o no está habilitada en la escena actual."""
 
 
+class DeshacerNoDisponible(Exception):
+    """No hay una elección válida reciente que deshacer."""
+
+
 class Sesion:
     def __init__(self, historia):
         self._historia = historia
@@ -16,6 +20,7 @@ class Sesion:
     def reiniciar(self):
         self._escena = self._historia.inicio
         self._variables = dict(self._historia.variables)
+        self._previo = None  # (escena, variables) anteriores a la última elección válida
 
     @property
     def escena(self):
@@ -41,9 +46,21 @@ class Sesion:
     def elegir(self, id_opcion):
         for op in self.opciones_disponibles():
             if op.id == id_opcion:
+                self._previo = (self._escena, dict(self._variables))
                 self._variables.update(op.efectos)
                 self._escena = op.destino
                 return self.escena
         raise OpcionNoDisponible(
             f"La opción '{id_opcion}' no existe o no está habilitada en la escena {self._escena}"
         )
+
+    def puede_deshacer(self):
+        return self._previo is not None
+
+    def deshacer(self):
+        """Restaura escena y variables previas a la última elección válida (un solo nivel)."""
+        if self._previo is None:
+            raise DeshacerNoDisponible("No hay ninguna decisión que deshacer")
+        self._escena, self._variables = self._previo
+        self._previo = None
+        return self.escena

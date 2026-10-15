@@ -5,6 +5,11 @@ from .historia import HistoriaInvalida, cargar_historia
 from .motor import OpcionNoDisponible, Sesion
 
 
+def _pregunta_fin(sesion, base="¿Jugar de nuevo?"):
+    extra = "/d (deshacer)" if sesion.puede_deshacer() else ""
+    return f"{base} (s/n{extra}): "
+
+
 def jugar(historia, entrada=input, salida=print):
     sesion = Sesion(historia)
     salida(f"=== {historia.titulo} ===")
@@ -12,20 +17,33 @@ def jugar(historia, entrada=input, salida=print):
         salida(f"\n[{sesion.escena.id}] {sesion.escena.texto}")
         if sesion.es_final():
             salida("\n-- FIN --")
-            if entrada("¿Jugar de nuevo? (s/n): ").strip().lower() == "s":
+            resp = entrada(_pregunta_fin(sesion)).strip().lower()
+            if resp == "s":
                 sesion.reiniciar()
-                continue
-            return
+            elif resp == "d" and sesion.puede_deshacer():
+                sesion.deshacer()
+            elif resp == "n":
+                return
+            continue
         opciones = sesion.opciones_disponibles()
         if not opciones:
             salida("La historia quedó bloqueada: no hay opciones disponibles.")
-            if entrada("¿Reiniciar? (s/n): ").strip().lower() == "s":
+            resp = entrada(_pregunta_fin(sesion, "¿Reiniciar?")).strip().lower()
+            if resp == "s":
                 sesion.reiniciar()
-                continue
-            return
+            elif resp == "d" and sesion.puede_deshacer():
+                sesion.deshacer()
+            elif resp == "n":
+                return
+            continue
         for n, op in enumerate(opciones, 1):
             salida(f"  {n}. {op.texto}")
+        if sesion.puede_deshacer():
+            salida("  0. Deshacer la última decisión")
         texto = entrada("Elige una opción: ").strip()
+        if texto == "0" and sesion.puede_deshacer():
+            sesion.deshacer()
+            continue
         if not texto.isdigit() or not 1 <= int(texto) <= len(opciones):
             salida("Entrada no válida. Escribe el número de una opción.")
             continue
