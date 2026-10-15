@@ -1,0 +1,19 @@
+{
+  "titulo": "El faro del festival",
+  "inicio": "F1",
+  "variables": {"tiene_llave": false},
+  "escenas": [
+    {"id": "F1", "texto": "Llegas al faro cerrado. Puedes buscar una llave bajo las rocas o ir directo a la puerta.", "final": false,
+     "opciones": [
+       {"id": "buscar", "texto": "Buscar la llave", "destino": "F2", "condiciones": {}, "efectos": {"tiene_llave": true}},
+       {"id": "directo", "texto": "Ir directo a la puerta", "destino": "F2", "condiciones": {}, "efectos": {}}
+     ]},
+    {"id": "F2", "texto": "Estás frente a la puerta del faro.", "final": false,
+     "opciones": [
+       {"id": "abrir", "texto": "Abrir con la llave", "destino": "F3", "condiciones": {"tiene_llave": true}, "efectos": {}},
+       {"id": "forzar", "texto": "Forzar la cerradura", "destino": "F4", "condiciones": {"tiene_llave": false}, "efectos": {}}
+     ]},
+    {"id": "F3", "texto": "La puerta cede y subes a encender la luz del faro.", "final": true, "opciones": []},
+    {"id": "F4", "texto": "Fuerzas la cerradura y suena la alarma. El festival termina antes de tiempo.", "final": true, "opciones": []}
+  ]
+}

@@ -1,0 +1,47 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0 -- /usr/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/claude/ultima_transmision
+configfile: pytest.ini
+testpaths: tests
+plugins: anyio-4.15.1
+collecting ... collected 36 items
+
+tests/test_motor.py::test_u1_condiciones_habilitan_opciones[True-esperadas0] PASSED [  2%]
+tests/test_motor.py::test_u1_condiciones_habilitan_opciones[False-esperadas1] PASSED [  5%]
+tests/test_motor.py::test_u2_eleccion_valida[True-activar_codigo-E4-variables0] PASSED [  8%]
+tests/test_motor.py::test_u2_eleccion_valida[False-activar_sin_verificar-E5-variables1] PASSED [ 11%]
+tests/test_motor.py::test_u2_eleccion_valida[True-cortar-E6-variables2] PASSED [ 13%]
+tests/test_motor.py::test_u2_eleccion_valida[False-cortar-E6-variables3] PASSED [ 16%]
+tests/test_motor.py::test_u3_opcion_invalida_no_altera_estado[False-activar_codigo] PASSED [ 19%]
+tests/test_motor.py::test_u3_opcion_invalida_no_altera_estado[True-activar_sin_verificar] PASSED [ 22%]
+tests/test_motor.py::test_u3_opcion_invalida_no_altera_estado[True-no_existe] PASSED [ 25%]
+tests/test_motor.py::test_u4_errores_de_contenido[falta_titulo] PASSED   [ 27%]
+tests/test_motor.py::test_u4_errores_de_contenido[falta_escenas] PASSED  [ 30%]
+tests/test_motor.py::test_u4_errores_de_contenido[falta_campo_escena] PASSED [ 33%]
+tests/test_motor.py::test_u4_errores_de_contenido[falta_campo_opcion] PASSED [ 36%]
+tests/test_motor.py::test_u4_errores_de_contenido[inicio_inexistente] PASSED [ 38%]
+tests/test_motor.py::test_u4_errores_de_contenido[escena_duplicada] PASSED [ 41%]
+tests/test_motor.py::test_u4_errores_de_contenido[opcion_duplicada] PASSED [ 44%]
+tests/test_motor.py::test_u4_errores_de_contenido[destino_inexistente] PASSED [ 47%]
+tests/test_motor.py::test_u4_errores_de_contenido[variable_no_declarada_condicion] PASSED [ 50%]
+tests/test_motor.py::test_u4_errores_de_contenido[variable_no_declarada_efecto] PASSED [ 52%]
+tests/test_motor.py::test_u4_errores_de_contenido[valor_no_booleano_condicion] PASSED [ 55%]
+tests/test_motor.py::test_u4_errores_de_contenido[valor_no_booleano_efecto] PASSED [ 58%]
+tests/test_motor.py::test_u4_errores_de_contenido[valor_no_booleano_inicial] PASSED [ 61%]
+tests/test_motor.py::test_u4_errores_de_contenido[final_con_opciones] PASSED [ 63%]
+tests/test_motor.py::test_u4_errores_de_contenido[no_final_sin_opciones] PASSED [ 66%]
+tests/test_motor.py::test_u4_errores_de_contenido[estructura_incorrecta_raiz] PASSED [ 69%]
+tests/test_motor.py::test_u4_archivo_ilegible PASSED                     [ 72%]
+tests/test_motor.py::test_u4_archivo_inexistente PASSED                  [ 75%]
+tests/test_motor.py::test_ca03_destino_inexistente_en_archivo PASSED     [ 77%]
+tests/test_motor.py::test_u5_reiniciar PASSED                            [ 80%]
+tests/test_motor.py::test_escena_bloqueada_se_informa_y_permite_reiniciar PASSED [ 83%]
+tests/test_motor.py::test_ca01_revisar_e_investigar PASSED               [ 86%]
+tests/test_motor.py::test_i1_integracion_tres_finales[ruta0-decisiones0-E4] PASSED [ 88%]
+tests/test_motor.py::test_i1_integracion_tres_finales[ruta1-decisiones1-E5] PASSED [ 91%]
+tests/test_motor.py::test_i1_integracion_tres_finales[ruta2-decisiones2-E6] PASSED [ 94%]
+tests/test_motor.py::test_segunda_historia_mismo_motor[decisiones0-F3] PASSED [ 97%]
+tests/test_motor.py::test_segunda_historia_mismo_motor[decisiones1-F4] PASSED [100%]
+
+============================== 36 passed in 0.05s ==============================
